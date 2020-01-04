@@ -1,127 +1,111 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>Laravel</title>
+@section('content')
+<div class="container">
+    <div>
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
-
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Nunito', sans-serif;
-                font-weight: 200;
-                height: 100vh;
-                margin: 0;
-            }
-
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 13px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}">Register</a>
-                        @endif
-                    @endauth
-                </div>
-            @endif
-
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Hello world</a>
-                </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="card" style="width: 1400px;">
+            <div class="card-body">
+                <form method="POST" action="#">
+                    @csrf
+                    <template>
+                        <el-tabs v-model="activeName" @tab-click="handleClick">
+                            <el-tab-pane label="问卷列表" name="first">
+                                <div class="template-table-wrapper">
+                                    <div id="template-table-form" data-type="form" class="template-table form">
+                                        <div class="form-introduce-wrap">
+                                            <div class="form-introduce-content">
+                                                <div class="form-introduce-text">
+                                                    收集表说明
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="section" id="-1">
+                                            <div class="section-title">
+                                                常用
+                                            </div>
+                                            <div class="sub" data-type="form" data-tid="25000" id="25000">
+                                                <a href="/table">
+                                                    <div class="thumb-wrapper" >
+                                                        <div class="thumb-shadow">
+                                                            <div class="thumb-shadow">
+                                                                <img id="thumb-25000" class="thumb-base" src="//docs.idqqimg.com/tim/docs/desktop/img/packages/desktop/src/img/black_doc_template@2x-3a21f0.png" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                                <div class="subitem-title">
+                                                    <span>空白</span>
+                                                </div>
+                                                <div class="subitem-white-subtitle">
+                                                    f
+                                                </div>
+                                            </div>
+                                            @foreach ($my_investigations as $my_investigation)
+                                                <div class="sub" data-type="form" data-tid="{$my_investigation.id}" id="{$my_investigation.id}">
+                                                    <div class="thumb-wrapper">
+                                                        <div class="thumb-shadow">
+                                                            <img id="thumb-30534" class="thumb-base" src="//pub.idqqimg.com/pc/misc/files/20190917/fe830247f8a634ec0f2203abba80b724.png" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="subitem-title">
+                                                        <span>{{$my_investigation->name}}}</span>
+                                                    </div>
+                                                    <div class="subitem-subtitle">
+                                                        12-17 | 19:34
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <div class="section" id="10">
+                                            <div class="section-title">
+                                                本周推荐
+                                            </div>
+                                            @foreach ($recommends as $recommend)
+                                            <div class="sub" data-type="form" data-tid="{{$recommend->id}}" id="{{$recommend->id}}">
+                                                <div class="thumb-wrapper">
+                                                    <div class="thumb-shadow">
+                                                        <img id="thumb-30534" class="thumb-base" src="//pub.idqqimg.com/pc/misc/files/20190917/fe830247f8a634ec0f2203abba80b724.png" />
+                                                    </div>
+                                                </div>
+                                                <div class="subitem-title">
+                                                    <span>{{$recommend->name}}</span>
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @foreach ($type as $item)
+                                        <div class="section" id="{{$item['id']}}">
+                                            <div class="section-title">
+                                                {{$item['name']}}
+                                            </div>
+                                            @foreach ($item['investigation_templates'] as $template)
+                                            <div class="sub" data-type="form" data-tid="{{$template['id']}}" id="{{$template['id']}}">
+                                                <div class="thumb-wrapper">
+                                                    <div class="thumb-shadow">
+                                                        <img id="thumb-30320" class="thumb-base" src="//pub.idqqimg.com/pc/misc/files/20190718/782adec91b42b9d440957e1fdb34529b.png" />
+                                                    </div>
+                                                </div>
+                                                <div class="subitem-title">
+                                                    <span>{{$template['name']}}</span>
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    <div style="display: none;">
+                                        <div class="eeui-spinner list-my-spinner"></div>
+                                    </div>
+                                </div>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </template>
+                </form>
             </div>
         </div>
-    </body>
-    <script src="https://cdn.bootcss.com/jquery/3.4.0/jquery.js"></script>
-    <script>
-        var a = 1;
-        var b = 1;
-        var c = 1;
-        function ajax1(){
-            $.get('/index?from=a', function(){
-                console.log('a' , a);
-                a++;
-                ajax1();
-            });
-        }
-        function ajax2(){
-            $.get('/index?from=b', function(){
-                console.log('b',b);
-                b++;
-                ajax2();
-            });
-        }
-        function ajax3(){
-            $.get('/index?from=c', function(){
-                console.log('c',c);
-                c++;
-                ajax3();
-            });
-        }
-
-        function beginAjax(){
-            ajax1();
-            ajax2();
-            ajax3();
-        }
-        beginAjax();
-    </script>
-</html>
+    </div>
+</div>
+@endsection

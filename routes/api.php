@@ -22,3 +22,8 @@ Route::middleware('auth:api')->get('/user1', function (Request $request) {
     return 1;
     return $request->user();
 });
+
+Route::get('/login', function (Request $request) {
+    return 1;
+    return $request->user();
+});

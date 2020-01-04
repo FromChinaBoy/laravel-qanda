@@ -11,15 +11,4 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function get()
-    {
-        if (1) {
-            echo 'ss';
-        }
-    }
-
-    public function sss()
-    {
-        echo 'dsadsadsasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss';
-    }
 }
