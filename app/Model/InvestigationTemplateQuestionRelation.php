@@ -19,7 +19,7 @@ namespace App\Model;
  * @property    string  $update_time       添加时间
  * @property    string  $delete_time       删除时间
  */
-class InvestigationTemplateOptionRelation extends BaseModel
+class InvestigationTemplateQuestionRelation extends BaseModel
 {
     protected $table = 'investigation_template_option_relation';
 }

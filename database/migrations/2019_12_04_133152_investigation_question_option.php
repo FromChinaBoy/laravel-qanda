@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class InvestigationOptionAnswer extends Migration
+class InvestigationQuestionOption extends Migration
 {
     /**
      * Run the migrations.
@@ -14,13 +14,11 @@ class InvestigationOptionAnswer extends Migration
     public function up()
     {
         //
-        Schema::create('investigation_option_answer', function (Blueprint $table) {
+        Schema::create('investigation_question_option', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('investigation_id');
-            $table->integer('investigation_option_id');
-            $table->text('content')->comment('内容');
-            $table->integer('user_id');
-            $table->integer('score')->default(0);
+            $table->integer('investigation_question_id');
+            $table->string('name',100)->comment('调查选项名');
+            $table->tinyInteger('score')->default(0)->comment('分值');
             $table->timestamp('create_time')->nullable();
             $table->timestamp('update_time')->nullable();
             $table->softDeletes('delete_time');
@@ -35,5 +33,6 @@ class InvestigationOptionAnswer extends Migration
     public function down()
     {
         //
+        Schema::dropIfExists('investigation_question_option');
     }
 }

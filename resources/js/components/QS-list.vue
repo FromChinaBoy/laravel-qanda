@@ -1,33 +1,34 @@
 <template>
   <div class="qs-list">
-    <ul v-if="qsList.length == 0 ? false : true">
+    <ul>
       <li></li>
       <li>标题</li>
-      <li>截止时间</li>
+      <li>发布时间</li>
       <li>状态</li>
-      <li>操作<span @click="$router.push({name: 'qsEdit', params: {num: 0}})">+新建问卷</span></li>
+      <li>操作<span @click="goUrl('/edit/0')">+新建问卷</span></li>
     </ul>
     <template v-for="item in qsList">
       <ul>
         <li><input type="checkbox" v-model="item.checked"></li>
-        <li>{{item.title}}</li>
-        <li>{{item.time}}</li>
-        <li :class="item.state === 'inissue' ? 'inissue' : ''">{{item.stateTitle}}</li>
+        <li>{{item.name}}</li>
+        <li>{{item.create_time}}</li>
+        <li :class="item.status === 1 ? 'inissue' : ''">{{item.status_text}}</li>
         <li>
-          <button @click="iterator = edit(item); iterator.next()">编辑</button>
-          <button @click="iterator = delItem(item.num); iterator.next()">删除</button>
-          <router-link :to="`/fill/${item.num}`" tag="button">查看问卷</router-link>
-          <button @click="iterator = watchData(item); iterator.next()">查看数据</button>
+          <el-button @click="iterator = edit(item); iterator.next()">编辑</el-button>
+          <el-button @click="iterator = delItem(item.num); iterator.next()">删除</el-button>
+          <el-button @click="iterator = delItem(item.num); iterator.next()">查看问卷</el-button>
+          <!--<router-link :to="`/fill/${item.num}`" tag="el-button">查看问卷</router-link>-->
+          <el-button @click="iterator = watchData(item); iterator.next()">查看数据</el-button>
         </li>
       </ul>
     </template>
     <div class="list-bottom" v-if="qsList.length == 0 ? false : true">
       <label><input type="checkbox" id="all-check" v-model="selectAll">全选</label>
-      <button @click="iterator = delItems(); iterator.next()">删除</button>
+      <el-button @click="iterator = delItems(); iterator.next()">删除</el-button>
     </div>
       <div class="add-qs" v-if="qsList.length === 0">
-        <button class="add-btn" 
-        @click="$router.push({name: 'qsEdit', params: {num: 0}})">+&nbsp;&nbsp;新建问卷</button>
+        <el-button class="add-btn"
+        @click="$router.push({name: 'qsEdit', params: {num: 0}})">+&nbsp;&nbsp;新建问卷</el-button>
       </div>
     <div class="shadow" v-if="showDialog">
       <div class="del-dialog">
@@ -37,8 +38,8 @@
         </header>
         <p>{{info}}</p>
         <div class="btn-box">
-          <button class="yes" @click="iterator.next();">确定</button>
-          <button @click="showDialog = false">取消</button>
+          <el-button class="yes" @click="iterator.next();">确定</el-button>
+          <el-button @click="showDialog = false">取消</el-button>
         </div>
       </div>
     </div>
@@ -63,70 +64,19 @@ import storage from '../store.js'
         info: ''
       }
     },
-    mounted() {
-      if (storage.get() !== null) {
-        this.qsList = storage.get();
+    created(){
+        console.log('investigations',investigations);
+        this.qsList = investigations;
         this.qsList.forEach( item => {
-          let [year, month, day] = item.time.split('-')
-          if (year < new Date().getFullYear()) {
-            item.state = 'issueed'
-            item.stateTitle = '已发布'
-          } else if (year == new Date().getFullYear() 
-            && month < new Date().getMonth() + 1) {
-            item.state = 'issueed'
-            item.stateTitle = '已发布'
-          } else if (year == new Date().getFullYear() 
-            && month == new Date().getMonth() + 1 
-            && day < new Date().getDate()) {
-            item.state = 'issueed'
-            item.stateTitle = '已发布'
-          }
-        })
-      } else {
-        storage.save([
-
-          { 'num': 1, 
-            'title': '第一份问卷', 
-            'time': '2030-1-1', 
-            'state': 'inissue', 
-            'stateTitle': '发布中', 
-            'checked': false, 
-            'question': [
-              {'num': 'Q1', 'title': '单选题', 'type': 'radio', 'isNeed': true, 'options': ['选项一', '选项二']},
-              {'num': 'Q2', 'title': '多选题', 'type': 'checkbox', 'isNeed': true, 'options': ['选项一', '选项二', '选项三', '选项四']},
-              {'num': 'Q3', 'title': '文本题', 'type': 'textarea', 'isNeed': true}
-            ]
-          },
-
-          { 'num': 2,
-            'title': '第二份问卷',
-            'time': '2030-1-1',
-            'state': 'noissue',
-            'stateTitle': '未发布',
-            'checked': false, 
-            'question': [
-              {'num': 'Q1', 'title': '单选题', 'type': 'radio', 'isNeed': true, 'options': ['选项一', '选项二']},
-              {'num': 'Q2', 'title': '多选题', 'type': 'checkbox', 'isNeed': true, 'options': ['选项一', '选项二', '选项三', '选项四']},
-              {'num': 'Q3', 'title': '文本题', 'type': 'textarea', 'isNeed': true}
-            ]
-          },
-
-          { 'num': 3,
-            'title': '第三份问卷', 
-            'time': '2017-3-27', 
-            'state': 'issueed', 
-            'stateTitle': '已发布', 
-            'checked': false, 
-            'question': [
-              {'num': 'Q1', 'title': '单选题', 'type': 'radio', 'isNeed': true, 'options': ['选项一', '选项二']},
-              {'num': 'Q2', 'title': '多选题', 'type': 'checkbox', 'isNeed': true, 'options': ['选项一', '选项二', '选项三', '选项四']},
-              {'num': 'Q3', 'title': '文本题', 'type': 'textarea', 'isNeed': true}
-            ]
-          }
-          
-        ]);
-        this.qsList = storage.get();
-      }
+            item.checked = false;
+            if(item.status == 1){
+                item.status_text = '发布中'
+            }else if(item.status == 0){
+                item.status_text = '未发布'
+            }else{
+                item.status_text = '未知'
+            }
+        });
     },
     methods: {
       showDialogMsg(info) {
@@ -162,25 +112,30 @@ import storage from '../store.js'
         })();     
       },
       *edit(item) {
+          console.log('item',item)
         yield (() => {
-          if (item.state === 'noissue') {
+          if (item.status === 0) {
             this.showDialogMsg('确认要编辑？');
           } else {
             this.showDialogMsg('只有未发布的问卷才能编辑');
           }
         })();
         yield (() => {
-          if (item.state !== 'noissue') {
-            this.showDialog = false;
+          if (item.status !== 0) {
+              this.showDialog = false;
           } else {
-            this.showDialog = false;
-            this.$router.push({name: 'qsEdit', params: { num: item.num }})
+              this.showDialog = false;
+              this.goUrl('/edit/' + item.id)
           }
+
         })();
+      },
+      goUrl(url) {
+          window.location.href = url
       },
       *watchData(item) {
         yield (() => {
-          if (item.state === 'noissue') {
+          if (item.status_text === 'noissue') {
             this.showDialogMsg('未发布的问卷无数据可查看');
           } else {
             this.$router.push({ name: 'qsData', params: { num: item.num }})
@@ -221,7 +176,7 @@ import storage from '../store.js'
         handler(val) {
           val.forEach( (item, index) => {
             item.num = index + 1
-          } )
+          } );
           storage.save(val);
         },
         deep: true

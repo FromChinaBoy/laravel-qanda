@@ -25,4 +25,13 @@ class Investigation extends BaseModel
     use SimpleStatus;
 
     protected $table = 'investigation';
+
+    /**
+     * @author: zzhpeng
+     * Date: 2020/1/9
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function questionRelation(){
+        return $this->hasMany('App\Model\InvestigationQuestionRelation','investigation_id','id');
+    }
 }

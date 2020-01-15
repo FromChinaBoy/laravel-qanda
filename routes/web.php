@@ -12,11 +12,12 @@
 */
 
 # ------------------ Index Route ------------------------
-Route::get('/', 'IndexController@welcome'); //首页列表页
+Route::any('/', 'IndexController@welcome'); //首页列表页
 Route::get('/index/questions', 'IndexController@questions');
 
 
 Route::get('/table', 'IndexController@table')->name('table'); //table页
+Route::get('/edit/{id}', 'IndexController@edit')->name('edit'); //建表页
 
 
 Route::get('/index', 'IndexController@index');

@@ -1,38 +1,38 @@
 <template>
   <div class="edit-container">
-    <h2 @click="titleClick" v-if="!titleChange">{{qsItem.title}}</h2>
+    <h2 @click="titleClick" v-if="!titleChange">{{qsItem.name}}</h2>
     <input type="text" name="qsTitle" v-if="titleChange"
     v-model="titleValue"
     @blur="onblur"
     @keyup.enter="onsubmit"
     ref="titleInput">
     <div class="content">
-      <div class="questions" v-for="(qs, index) in qsItem.question">
+      <div class="questions" v-for="(qs, index) in qsItem.question_relation">
         <div class="qs-left">
-          <p class="qs-title">
-            {{qs.num}}&nbsp;{{qs.title}}&nbsp;{{getMsg(qs)}}
+          <p class="qs-title" @click="titleClick" >
+            {{qs.question.num}}&nbsp;{{qs.question.name}}&nbsp;{{turnQuestionType(qs.question)}}
           </p>
-          <p v-for="option in qs.options" class="option">
+          <p v-for="option in qs.question.options" class="option">
             <label>
               <input 
               type="radio" 
-              :name="`${qs.num}-${qs.title}`"
-              v-if="qs.type === 'radio'">
+              :name="`${qs.num}-${qs.name}`"
+              v-if="qs.question.type === 'radio'">
               <input 
               type="checkbox" 
-              :name="`${qs.num}-${qs.title}`"
-              v-if="qs.type === 'checkbox'">{{option}}
+              :name="`${qs.num}-${qs.name}`"
+              v-if="qs.question.type === 'checkbox'">{{option.name}}
             </label>
           </p>
           <textarea 
           v-if="qs.type === 'textarea'"></textarea>
         </div>
         <div class="qs-right">
-          <label><input type="checkbox" :value="qs.isNeed" v-model="qs.isNeed">
+          <label><input type="checkbox" :value="qs.question.is_must" v-model="qs.question.is_must">
           此题是否必填</label>
           <p>
             <span v-if="index !== 0" @click="goUp(index)">上移</span>
-            <span v-if="index !== qsItem.question.length - 1" @click="goDown(index)">下移</span>
+            <span v-if="index !== qsItem.question_relation.length - 1" @click="goDown(index)">下移</span>
             <span @click="copy(index, qs)">复用</span>
             <span @click="del(index)">删除</span>
           </p>
@@ -41,9 +41,9 @@
       <div class="add">
         <transition name="slide">
           <div class="add-option" v-if="showBtn">
-            <button @click="addRadio">单选</button>
-            <button @click="addCheckbox">多选</button>
-            <button @click="addTextarea">文本框</button>
+            <el-button @click="addRadio">单选</el-button>
+            <el-button @click="addCheckbox">多选</el-button>
+            <el-button @click="addTextarea">文本框</el-button>
           </div>
         </transition>
         <div class="add-item" @click="addItemClick">
@@ -61,8 +61,8 @@
         <label>输入题目标题<input type="text" v-model="qsInputTitle"></label>
         <label v-if="showAddOptionInput">输入选项<input type="text" v-model="qsInputOptions"></label>
         <div class="btn-box">
-          <button class="yes" @click="validateAddQs">确定</button>
-          <button @click="showAddQsDialog = false">取消</button>
+          <el-button class="yes" @click="validateAddQs">确定</el-button>
+          <el-button @click="showAddQsDialog = false">取消</el-button>
         </div>
       </div>
     </div>
@@ -74,8 +74,8 @@
         </header>
         <p>{{info}}</p>
         <div class="btn-box">
-          <button class="yes" @click="iterator.next()">确定</button>
-          <button @click="cancel">取消</button>
+          <el-button class="yes" @click="iterator.next()">确定</el-button>
+          <el-button @click="cancel">取消</el-button>
         </div>
       </div>
     </div>
@@ -87,8 +87,8 @@
       @getValue="getValue">
       </calendar-input>
       <div class="btn-box">
-        <button class="save" @click="iterator = save(); iterator.next()">保存问卷</button>
-        <button class="issue" @click="iterator = issueQs(); iterator.next()">发布问卷</button>
+        <el-button class="save" @click="iterator = save(); iterator.next()">保存问卷</el-button>
+        <el-button class="issue" @click="iterator = issueQs(); iterator.next()">发布问卷</el-button>
       </div>
     </footer>
   </div>
@@ -109,9 +109,19 @@ export default {
   },
   data() {
     return {
-      qsItem: {},
-      qsList: storage.get(),
-      isError: false,
+      id:0,
+      qsItem: {
+          id : 0,
+          name : '请填写标题',
+          desc : '请填写描述',
+          create_time : '',
+          status : 0,
+          question : [],
+          statusTitle : '停用',
+          checked : false
+      },
+      qsList: [],
+      isError: true,
       showBtn: false,
       titleChange: false,
       titleValue: '',
@@ -126,10 +136,11 @@ export default {
       showDialog: false,
       iterator: {},
       isGoIndex: false
+
     }
   },
   beforeRouteEnter(to, from ,next) {
-    let num = to.params.num
+    let num = 0
     let theItem = {}
     if (num != 0) {
       let length = storage.get().length
@@ -144,7 +155,7 @@ export default {
           }
         }
       }
-      if (theItem.state === 'noissue') {
+      if (theItem.status === 'noissue') {
         next()
       } else {
         alert('非法路由')
@@ -155,51 +166,36 @@ export default {
     }
   },
   created() {
-    this.fetchData()
+    if(my_investigation)  {
+        this.qsItem = my_investigation
+        this.id =  this.qsItem.id
+    }
+
+    this.fetchData();
   },
   methods: {
     fetchData() {
-      this.limit = { 
+      this.limit = {
           minYear: new Date().getFullYear(),
           minMonth: new Date().getMonth() + 1,
           minDay: new Date().getDate(),
           maxYear: 2030,
           maxMonth: 3,
           maxDay: 20
-        }
-      if (this.$route.params.num == 0) {
-        let item = {}
-        item.num        = this.qsList.length + 1
-        item.title      = '这里是标题'
-        item.time       = ''
-        item.state      = 'noissue'
-        item.question   = []
-        item.stateTitle = '未发布'
-        item.checked    = false
-        this.qsItem = item
-        this.qsList.push(this.qsItem)
-      } else {
-        let i = 0
-        for (let length = this.qsList.length; i < length; i++) {
-          if (this.qsList[i].num == this.$route.params.num) {
-            this.qsItem = this.qsList[i]
-            break
-          }
-        }
-        if ( i === this.qsList.length) this.isError = true
-      } 
+      }
+      if (this.id == 0) {
+          this.qsList.push(this.qsItem)
+      }
     },
-    getMsg(item) {
+    turnQuestionType(option) {
       let msg = ''
-      if (item.type === 'radio') {
+      if (option.type === 'radio') {
         msg = '(单选题)'
-      } else if (item.type === 'checkbox') {
+      } else if (option.type === 'checkbox') {
         msg = '(多选题)'
       } else {
         msg = '(文本题)'
       }
-
-      return item.isNeed ? `${msg} *` : msg
     },
     onblur() {
       this.titleValue = this.titleValue.trim()
@@ -218,22 +214,23 @@ export default {
       }, 150 )
     },
     swapItems(oldIndex, newIndex) {
-      let [newVal] = this.qsItem.question.splice(newIndex, 1, this.qsItem.question[oldIndex])
-      this.qsItem.question.splice(oldIndex, 1, newVal)
+      let [newVal] = this.qsItem.question_relation.splice(newIndex, 1, this.qsItem.question_relation[oldIndex])
+      this.qsItem.question_relation.splice(oldIndex, 1, newVal)
     },
     goUp(index) {
       this.swapItems(index, index - 1)
     },
-    goDown(index) {
+    goDown(index) {length
+
       this.swapItems(index, index + 1)
     },
     copy(index, qs) {
       if (this.questionLength === 10) return alert('问卷已满！')
       qs = Object.assign({}, qs)
-      this.qsItem.question.splice(index, 0, qs)
+      this.qsItem.question_relation.splice(index, 0, qs)
     },
     del(index) {
-      this.qsItem.question.splice(index, 1)
+      this.qsItem.question_relation.splice(index, 1)
     },
     addItemClick() {
       if (this.showBtn === false) {
@@ -312,8 +309,8 @@ export default {
       }
       
       yield
-      this.qsItem.state = 'inissue'
-      this.qsItem.stateTitle = '发布中'
+      this.qsItem.status = 'inissue'
+      this.qsItem.statusTitle = '发布中'
       storage.save(this.qsList)
       this.showDialog = false
       this.$router.push({path:'/'})
@@ -326,8 +323,8 @@ export default {
         this.showDialog = false
         alert('问卷为空无法保存')
       } else {
-        this.qsItem.state = 'inissue'
-        this.qsItem.stateTitle = '发布中'
+        this.qsItem.status = 'inissue'
+        this.qsItem.statusTitle = '发布中'
         storage.save(this.qsList)
         this.showDialog = false
         this.$router.push({path:'/'})
@@ -343,14 +340,14 @@ export default {
   },
   computed: {
     questionLength() {
-      return this.qsItem.question.length
+      return this.qsItem.question_relation.length
     }
   },
   watch: {
     '$route': 'fetchData',
     qsItem: {
       handler(newVal) {
-        newVal.question.forEach( (item, index) => {
+        newVal.question_relation.forEach( (item, index) => {
           item.num = `Q${index + 1}`
         } )
       },
@@ -358,6 +355,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style lang="scss" scoped>

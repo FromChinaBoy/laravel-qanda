@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class InvestigationOptionRelation extends Migration
+class InvestigationTemplateQuestionRelation extends Migration
 {
     /**
      * Run the migrations.
@@ -14,10 +14,10 @@ class InvestigationOptionRelation extends Migration
     public function up()
     {
         //
-        Schema::create('investigation_option_relation', function (Blueprint $table) {
+        Schema::create('investigation_template_question_relation', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('investigation_id');
-            $table->integer('investigation_option_id');
+            $table->integer('investigation_template_id');
+            $table->integer('investigation_question_id');
             $table->tinyInteger('sort')->default(0);
             $table->timestamp('create_time')->nullable();
             $table->timestamp('update_time')->nullable();
@@ -32,7 +32,6 @@ class InvestigationOptionRelation extends Migration
      */
     public function down()
     {
-        //
-        Schema::dropIfExists('investigation_option_relation');
+        Schema::dropIfExists('investigation_template_question_relation');
     }
 }

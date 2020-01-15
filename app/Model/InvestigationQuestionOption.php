@@ -9,7 +9,7 @@
 namespace App\Model;
 
 
-class InvestigationOptionAnswer extends BaseModel
+class InvestigationQuestionOption extends BaseModel
 {
-    protected $table = 'investigation_option_answer';
+    protected $table = 'investigation_question_option';
 }

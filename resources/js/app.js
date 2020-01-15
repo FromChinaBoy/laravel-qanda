@@ -28,13 +28,20 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
  */
 
 import ElementUI from 'element-ui';
-import vHeader from './components/public/header';
+import qsList from './components/QS-list'
+import qsData from './components/QS-data'
+import qsFill from './components/QS-fill'
+import qsEdit from './components/QS-edit'
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI);
 
 const app = new Vue({
     el: '#app',
     components: {
+        qsList,
+        qsData,
+        qsFill,
+        qsEdit,
     },
     data() {
         return {
