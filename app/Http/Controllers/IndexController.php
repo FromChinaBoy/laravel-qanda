@@ -53,12 +53,26 @@ class IndexController extends Controller
     public function edit($id){
         $myInvestigation = [];
         if($id>0){
-            $myInvestigation = (new Investigation())->with('questionRelation.question.options')
+            $myInvestigations = (new Investigation())->with(['questionRelation'=>function($q){
+                $q->with(['question'=>function($q){
+                    $q->with('options');
+                }])->orderBy('sort','desc');
+            }])
                 ->where('user_id',Auth::id())
                 ->findOrFail($id);
+            foreach($myInvestigations->questionRelation as &$questionRelation){
+                $questionRelation->name = $questionRelation->question->name;
+                $questionRelation->type = $questionRelation->question->type;
+                $questionRelation->is_must = $questionRelation->question->is_must;
+                $questionRelation->options = $questionRelation->question->options;
+            }
+            $myInvestigations->question = $myInvestigations->questionRelation;
+            unset($myInvestigations->questionRelation);
+            $myInvestigation = $myInvestigations->toArray();
+
         }
 
-        return view('edit', ['my_investigation'=>json_encode($myInvestigation->toArray())]);
+        return view('edit', ['my_investigation'=>json_encode($myInvestigation)]);
 
     }
 
@@ -76,4 +90,5 @@ class IndexController extends Controller
 
         return response($type, 200, array('Content-Type' => 'text/json'));
     }
+
 }
