@@ -26,10 +26,6 @@
       <label><input type="checkbox" id="all-check" v-model="selectAll">全选</label>
       <el-button @click="iterator = delItems(); iterator.next()">删除</el-button>
     </div>
-      <div class="add-qs" v-if="qsList.length === 0">
-        <el-button class="add-btn"
-        @click="$router.push({name: 'qsEdit', params: {num: 0}})">+&nbsp;&nbsp;新建问卷</el-button>
-      </div>
     <div class="shadow" v-if="showDialog">
       <div class="del-dialog">
         <header>

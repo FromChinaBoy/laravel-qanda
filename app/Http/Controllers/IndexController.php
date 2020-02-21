@@ -72,7 +72,7 @@ class IndexController extends Controller
 
         }
 
-        return view('edit', ['my_investigation'=>json_encode($myInvestigation)]);
+        return view('edit', ['my_investigation1'=>json_encode($myInvestigation)]);
 
     }
 

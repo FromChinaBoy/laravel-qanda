@@ -1,7 +1,7 @@
 <template>
     <div class="edit-container">
-        <h2 @click="titleClick" v-if="!titleChange">{{qsItem.name}}</h2>
-        <input type="text" name="qsTitle" v-if="titleChange"
+        <h2 @click="titleClick" >{{qsItem.name}}</h2>
+        <input type="text" name="qsTitle"
                v-model="titleValue"
                @blur="onblur"
                @keyup.enter="onsubmit"
@@ -122,7 +122,7 @@
                 qsList: [],
                 isError: true,
                 showBtn: false,
-                titleChange: false,
+                titleChange: true,
                 titleValue: '',
                 showAddQsDialog: false,
                 showAddOptionInput: true,
@@ -130,7 +130,6 @@
                 qsInputOptions: [],
                 info: '',
                 addOptionType: '',
-                limit: {},
                 showDialog: false,
                 iterator: {},
                 isGoIndex: false
@@ -164,31 +163,22 @@
             }
         },
         created() {
-            if (my_investigation) {
+            console.log('this.qsItem',this.qsItem)
+            console.log('my_investigation',my_investigation)
+            if (my_investigation.length != 0) {
                 this.qsItem = my_investigation
                 this.id = this.qsItem.id
             }
 
+            console.log('in')
             this.fetchData();
         },
         methods: {
             fetchData() {
-                this.limit = {
-                    minYear: new Date().getFullYear(),
-                    minMonth: new Date().getMonth() + 1,
-                    minDay: new Date().getDate(),
-                    maxYear: 2030,
-                    maxMonth: 3,
-                    maxDay: 20
-                }
-                if (this.id == 0) {
-                    this.qsList.push(this.qsItem)
-                }
-
                 if (this.qsItem.question) {
                     this.addNum(this.qsItem.question);
                 }
-
+                console.log('this.qsItem',this.qsItem)
             },
             turnQuestionType(option) {
                 let msg = ''
@@ -284,13 +274,14 @@
                         });
                     }
 
+                    console.log('this.qsItem.question',this.qsItem);
                     this.qsItem.question.push({
                         'num': this.qsItem.question.length - 1,
                         'name': qsTitle,
                         'type': this.addOptionType,
                         'is_must': true,
                         'options': options
-                    })
+                    });
                     this.showAddQsDialog = false
                 } else {
                     this.qsItem.question.push({
@@ -303,7 +294,7 @@
                 }
             },
             getValue(selectTime) {
-                this.qsItem.effective_time = selectTime
+                // this.qsItem.effective_time = selectTime
             },
             * save() {
                 this.showDialog = true
@@ -312,12 +303,7 @@
                 if (this.qsItem.question.length === 0) {
                     this.showDialog = false
                     alert('问卷为空无法保存')
-                } else {
-                    this.info = '是否发布?'
-                    this.isGoIndex = true
                 }
-
-                yield
                 this.qsItem.status = 1
                 this.qsItem.statusTitle = '发布中'
                 this.showDialog = false

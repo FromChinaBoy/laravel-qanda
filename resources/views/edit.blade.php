@@ -24,6 +24,6 @@
     </div>
 @endsection
 <script>
-    var my_investigation = {!! $my_investigation !!};
-    console.log('my_investigation',my_investigation);
+    var my_investigation = {!! $my_investigation1 !!};
+    console.log('my_investigation1',my_investigation);
 </script>
