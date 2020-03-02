@@ -1,8 +1,9 @@
 <template>
   <div class="block">
     <el-date-picker
-            v-model="value1"
+            v-model="value"
             type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="选择日期时间">
     </el-date-picker>
   </div>
@@ -13,9 +14,7 @@
         name: 'calendar-input',
         data() {
             return {
-                value1: '',
-                value2: '',
-                value3: ''
+                value: ''
             };
         },
         methods: {
@@ -23,7 +22,7 @@
         },
         computed: {
             selectValue: function () {
-                return `${this.value1}-${this.value2}-${this.value3}`;
+                return `${this.value}`;
             },
         },
         watch: {

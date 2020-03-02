@@ -43,40 +43,6 @@ class IndexController extends Controller
     }
 
     /**
-     *  编辑页面
-     * @author: zzhpeng
-     * Date: 2020/1/10
-     * @param $id
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function edit($id){
-        $myInvestigation = [];
-        if($id>0){
-            $myInvestigations = (new Investigation())->with(['questionRelation'=>function($q){
-                $q->with(['question'=>function($q){
-                    $q->with('options');
-                }])->orderBy('sort','desc');
-            }])
-                ->where('user_id',Auth::id())
-                ->findOrFail($id);
-            foreach($myInvestigations->questionRelation as &$questionRelation){
-                $questionRelation->name = $questionRelation->question->name;
-                $questionRelation->type = $questionRelation->question->type;
-                $questionRelation->is_must = $questionRelation->question->is_must;
-                $questionRelation->options = $questionRelation->question->options;
-            }
-            $myInvestigations->question = $myInvestigations->questionRelation;
-            unset($myInvestigations->questionRelation);
-            $myInvestigation = $myInvestigations->toArray();
-
-        }
-
-        return view('edit', ['my_investigation1'=>json_encode($myInvestigation)]);
-
-    }
-
-    /**
      * 获取问卷列表
      * @author: zzhpeng
      * Date: 2019/12/29

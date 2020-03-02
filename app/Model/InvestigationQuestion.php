@@ -8,7 +8,19 @@
 
 namespace App\Model;
 
-
+/**
+ * Class InvestigationQuestion
+ * @package App\Model
+ * @Author  zzhpeng
+ * @property    int $investigation_id              调查id
+ * @property    string $name              问题名
+ * @property    string  $type              问题类型
+ * @property    string  $is_must            是否必须
+ * @property    integer  $sort           排序
+ * @property    string  $create_time          添加时间
+ * @property    string  $update_time          添加时间
+ * @property    string  $delete_time          删除时间
+ */
 class InvestigationQuestion extends BaseModel
 {
     protected $table = 'investigation_question';

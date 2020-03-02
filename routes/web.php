@@ -17,9 +17,12 @@ Route::get('/index/questions', 'IndexController@questions');
 
 
 Route::get('/table', 'IndexController@table')->name('table'); //table页
-Route::get('/edit/{id}', 'IndexController@edit')->name('edit'); //建表页
 
-Route::post('/investigation/save', 'InvestigationController@save'); //建表页
+Route::group(['middleware' => 'auth'],function($route){
+    $route->get('/investigation/edit/{id}', 'InvestigationController@edit'); //编辑页
+    $route->post('/investigation/save', 'InvestigationController@save'); //提交数据 更新和添加
+});
+
 
 Route::get('/index', 'IndexController@index');
 

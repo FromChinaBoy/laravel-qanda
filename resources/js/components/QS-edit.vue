@@ -1,11 +1,9 @@
 <template>
     <div class="edit-container">
-        <h2 @click="titleClick" >{{qsItem.name}}</h2>
-        <input type="text" name="qsTitle"
-               v-model="titleValue"
-               @blur="onblur"
-               @keyup.enter="onsubmit"
-               ref="titleInput">
+        <el-input v-model="qsItem.name" placeholder="请输入标题" clearable></el-input>
+
+        <el-input v-model="qsItem.desc" placeholder="请输入描述" clearable></el-input>
+
         <div class="content">
             <div class="questions" v-for="(qs, index) in qsItem.question">
                 <div class="qs-left">
@@ -82,7 +80,8 @@
         <footer>
             <span>问卷截止日期</span>
             <calendar-input
-                @getValue="getValue">
+                @getValue="getValue"
+            >
             </calendar-input>
             <div class="btn-box">
                 <el-button class="save" @click="iterator = save(); iterator.next()">保存问卷</el-button>
@@ -111,19 +110,21 @@
                 id: 0,
                 qsItem: {
                     id: 0,
-                    name: '请填写标题',
-                    desc: '请填写描述',
+                    name: '',
+                    desc: '',
                     create_time: '',
                     status: 0,
                     question: [],
                     statusTitle: '停用',
-                    checked: false
+                    checked: false,
+                    effective_time: ''
                 },
+                titleValue: '',
+                descValue: '',
                 qsList: [],
                 isError: true,
                 showBtn: false,
                 titleChange: true,
-                titleValue: '',
                 showAddQsDialog: false,
                 showAddOptionInput: true,
                 qsInputTitle: '',
@@ -163,14 +164,11 @@
             }
         },
         created() {
-            console.log('this.qsItem',this.qsItem)
-            console.log('my_investigation',my_investigation)
             if (my_investigation.length != 0) {
                 this.qsItem = my_investigation
                 this.id = this.qsItem.id
             }
 
-            console.log('in')
             this.fetchData();
         },
         methods: {
@@ -178,7 +176,6 @@
                 if (this.qsItem.question) {
                     this.addNum(this.qsItem.question);
                 }
-                console.log('this.qsItem',this.qsItem)
             },
             turnQuestionType(option) {
                 let msg = ''
@@ -277,6 +274,7 @@
                     console.log('this.qsItem.question',this.qsItem);
                     this.qsItem.question.push({
                         'num': this.qsItem.question.length - 1,
+                        'id': 0,
                         'name': qsTitle,
                         'type': this.addOptionType,
                         'is_must': true,
@@ -294,15 +292,54 @@
                 }
             },
             getValue(selectTime) {
-                // this.qsItem.effective_time = selectTime
+                this.qsItem.effective_time = selectTime
             },
             * save() {
                 this.showDialog = true
                 this.info = '确认保存?'
                 yield
+                if ((this.qsItem.name.trim()) === '') {
+                    this.showDialog = false
+                    alert('标题为空无法保存')
+                    return ;
+                }
+                if ((this.qsItem.desc.trim()) === '') {
+                    this.showDialog = false
+                    alert('描述为空无法保存')
+                    return ;
+                }
                 if (this.qsItem.question.length === 0) {
                     this.showDialog = false
                     alert('问卷为空无法保存')
+                    return ;
+                }
+                this.qsItem.status = 1
+                this.qsItem.statusTitle = '发布中'
+                this.showDialog = false
+                // 可选地，上面的请求可以这样做
+                axios.post('/investigation/save', {
+                    id: this.qsItem.id,
+                    name: this.qsItem.name.trim(),
+                    desc: this.qsItem.desc.trim(),
+                    status: this.qsItem.status,
+                    effective_time: this.qsItem.effective_time,
+                    question: this.qsItem.question
+                })
+                .then(function (response) {
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            },
+            * issueQs() {
+                this.showDialog = true
+                this.info = '确认发布?'
+                yield
+                if (this.qsItem.question.length === 0) {
+                    this.showDialog = false
+                    alert('问卷为空无法保存')
+                    return ;
                 }
                 this.qsItem.status = 1
                 this.qsItem.statusTitle = '发布中'
@@ -316,28 +353,12 @@
                     effective_time: this.qsItem.effective_time,
                     question: this.qsItem.question
                 })
-                    .then(function (response) {
-                        console.log(response);
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-            },
-            * issueQs() {
-                this.showDialog = true
-                this.info = '确认发布?'
-                yield
-                if (this.qsItem.question.length === 0) {
-                    this.showDialog = false
-                    alert('问卷为空无法保存')
-                } else {
-                    this.qsItem.status = 1
-                    this.qsItem.statusTitle = '发布中'
-                    storage.save(this.qsList)
-                    this.showDialog = false
-                    this.$router.push({path: '/'})
-                }
-
+                .then(function (response) {
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
             },
             cancel() {
                 this.showDialog = false

@@ -5,7 +5,7 @@
       <li>标题</li>
       <li>发布时间</li>
       <li>状态</li>
-      <li>操作<span @click="goUrl('/edit/0')">+新建问卷</span></li>
+      <li>操作<span @click="goUrl('/investigation/edit/0')">+新建问卷</span></li>
     </ul>
     <template v-for="item in qsList">
       <ul>
@@ -121,7 +121,7 @@ import storage from '../store.js'
               this.showDialog = false;
           } else {
               this.showDialog = false;
-              this.goUrl('/edit/' + item.id)
+              this.goUrl('/investigation/edit/' + item.id)
           }
 
         })();
