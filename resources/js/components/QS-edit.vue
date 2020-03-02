@@ -5,7 +5,7 @@
         <el-input v-model="qsItem.desc" placeholder="请输入描述" clearable></el-input>
 
         <div class="content">
-            <div class="questions" v-for="(qs, index) in qsItem.question">
+            <div class="questions" v-for="(qs, index) in qsItem.questions">
                 <div class="qs-left">
                     <p class="qs-title" @click="titleClick">
                         {{qs.num}}&nbsp;{{qs.name}}&nbsp;{{turnQuestionType(qs.type)}}
@@ -81,6 +81,7 @@
             <span>问卷截止日期</span>
             <calendar-input
                 @getValue="getValue"
+                :effective_time="this.qsItem.effective_time"
             >
             </calendar-input>
             <div class="btn-box">
@@ -114,7 +115,7 @@
                     desc: '',
                     create_time: '',
                     status: 0,
-                    question: [],
+                    questions: [],
                     statusTitle: '停用',
                     checked: false,
                     effective_time: ''
@@ -137,32 +138,32 @@
 
             }
         },
-        beforeRouteEnter(to, from, next) {
-            let num = 0
-            let theItem = {}
-            if (num != 0) {
-                let length = storage.get().length
-                if (num < 0 || num > length) {
-                    alert('非法路由!')
-                    next('/')
-                } else {
-                    for (let i = 0; i < length; i++) {
-                        if (storage.get()[i].num == num) {
-                            theItem = storage.get()[i]
-                            break
-                        }
-                    }
-                }
-                if (theItem.status === 'noissue') {
-                    next()
-                } else {
-                    alert('非法路由')
-                    next('/')
-                }
-            } else {
-                next()
-            }
-        },
+        // beforeRouteEnter(to, from, next) {
+        //     let num = 0
+        //     let theItem = {}
+        //     if (num != 0) {
+        //         let length = storage.get().length
+        //         if (num < 0 || num > length) {
+        //             alert('非法路由!')
+        //             next('/')
+        //         } else {
+        //             for (let i = 0; i < length; i++) {
+        //                 if (storage.get()[i].num == num) {
+        //                     theItem = storage.get()[i]
+        //                     break
+        //                 }
+        //             }
+        //         }
+        //         if (theItem.status === 'noissue') {
+        //             next()
+        //         } else {
+        //             alert('非法路由')
+        //             next('/')
+        //         }
+        //     } else {
+        //         next()
+        //     }
+        // },
         created() {
             if (my_investigation.length != 0) {
                 this.qsItem = my_investigation
@@ -173,8 +174,8 @@
         },
         methods: {
             fetchData() {
-                if (this.qsItem.question) {
-                    this.addNum(this.qsItem.question);
+                if (this.qsItem.questions) {
+                    this.addNum(this.qsItem.questions);
                 }
             },
             turnQuestionType(option) {
@@ -204,8 +205,8 @@
                 }, 150)
             },
             swapItems(oldIndex, newIndex) {
-                let [newVal] = this.qsItem.question.splice(newIndex, 1, this.qsItem.question[oldIndex])
-                this.qsItem.question.splice(oldIndex, 1, newVal)
+                let [newVal] = this.qsItem.questions.splice(newIndex, 1, this.qsItem.questions[oldIndex])
+                this.qsItem.questions.splice(oldIndex, 1, newVal)
             },
             goUp(index) {
                 this.swapItems(index, index - 1)
@@ -216,10 +217,10 @@
             copy(index, qs) {
                 if (this.questionLength === 10) return alert('问卷已满！')
                 qs = Object.assign({}, qs);
-                this.qsItem.question.splice(index, 0, qs)
+                this.qsItem.questions.splice(index, 0, qs)
             },
             del(index) {
-                this.qsItem.question.splice(index, 1)
+                this.qsItem.questions.splice(index, 1)
             },
             addItemClick() {
                 if (this.showBtn === false) {
@@ -271,9 +272,9 @@
                         });
                     }
 
-                    console.log('this.qsItem.question',this.qsItem);
-                    this.qsItem.question.push({
-                        'num': this.qsItem.question.length - 1,
+                    console.log('this.qsItem.questions',this.qsItem);
+                    this.qsItem.questions.push({
+                        'num': this.qsItem.questions.length - 1,
                         'id': 0,
                         'name': qsTitle,
                         'type': this.addOptionType,
@@ -282,8 +283,8 @@
                     });
                     this.showAddQsDialog = false
                 } else {
-                    this.qsItem.question.push({
-                        'num': this.qsItem.question.length - 1,
+                    this.qsItem.questions.push({
+                        'num': this.qsItem.questions.length - 1,
                         'title': qsTitle,
                         'type': 'textarea',
                         'isNeed': true
@@ -292,7 +293,9 @@
                 }
             },
             getValue(selectTime) {
-                this.qsItem.effective_time = selectTime
+                if(selectTime){
+                    this.qsItem.effective_time = selectTime
+                }
             },
             * save() {
                 this.showDialog = true
@@ -308,7 +311,7 @@
                     alert('描述为空无法保存')
                     return ;
                 }
-                if (this.qsItem.question.length === 0) {
+                if (this.qsItem.questions.length === 0) {
                     this.showDialog = false
                     alert('问卷为空无法保存')
                     return ;
@@ -323,7 +326,7 @@
                     desc: this.qsItem.desc.trim(),
                     status: this.qsItem.status,
                     effective_time: this.qsItem.effective_time,
-                    question: this.qsItem.question
+                    questions: this.qsItem.questions
                 })
                 .then(function (response) {
                     console.log(response);
@@ -336,7 +339,7 @@
                 this.showDialog = true
                 this.info = '确认发布?'
                 yield
-                if (this.qsItem.question.length === 0) {
+                if (this.qsItem.questions.length === 0) {
                     this.showDialog = false
                     alert('问卷为空无法保存')
                     return ;
@@ -351,7 +354,7 @@
                     desc: this.qsItem.desc,
                     status: this.qsItem.status,
                     effective_time: this.qsItem.effective_time,
-                    question: this.qsItem.question
+                    questions: this.qsItem.questions
                 })
                 .then(function (response) {
                     console.log(response);
@@ -366,16 +369,16 @@
                     this.$router.push({path: '/'})
                 }
             },
-            addNum(question) {
-                question.forEach((item, index) => {
+            addNum(questions) {
+                questions.forEach((item, index) => {
                     item.num = `Q${index + 1}`
                 })
             }
         },
         computed: {
             questionLength() {
-                if (this.qsItem.question) {
-                    return this.qsItem.question.length
+                if (this.qsItem.questions) {
+                    return this.qsItem.questions.length
                 }
                 return 0;
             }
@@ -384,8 +387,8 @@
             '$route': 'fetchData',
             qsItem: {
                 handler(newVal) {
-                    if (newVal.question) {
-                        this.addNum(newVal.question);
+                    if (newVal.questions) {
+                        this.addNum(newVal.questions);
                     }
                 },
                 deep: true

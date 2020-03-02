@@ -12,9 +12,10 @@
 <script>
     export default {
         name: 'calendar-input',
+        props: ['effective_time'],
         data() {
             return {
-                value: ''
+                value: this.effective_time
             };
         },
         methods: {

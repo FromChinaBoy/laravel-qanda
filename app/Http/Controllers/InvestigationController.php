@@ -9,6 +9,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Logic\InvestigationLogic;
 use App\Model\Investigation;
 use App\Model\InvestigationQuestion;
 use App\Model\InvestigationQuestionOption;
@@ -35,14 +36,8 @@ class InvestigationController extends Controller
     public function edit($id){
         $myInvestigation = [];
         if($id>0){
-            $myInvestigations = (new Investigation())->with(['questions'=>function($q){
-                $q->with('options')->orderBy('sort','desc');
-            }])
-            ->where('user_id',Auth::id())
-            ->findOrFail($id);
-            $myInvestigation = $myInvestigations->toArray();
-
-            var_dump($myInvestigation);exit;
+            $investigationLogic = InvestigationLogic::getInvestigationDetail($id);
+            $myInvestigation = $investigationLogic->toArray();
         }
 
         return view('edit', ['my_investigation1'=>json_encode($myInvestigation)]);
@@ -53,14 +48,14 @@ class InvestigationController extends Controller
         try{
             //获取数据
             $all = $request->all();
-            $questions = $request->input('question');
+            $questions = $request->input('questions');
             $id = $request->input('id');
             //验证数据
             $validator = Validator::make($all, [
                 'name' => 'required',
                 'desc' => 'required',
                 'status' => 'required|In:0,1',
-                'question' => 'required|Array',
+                'questions' => 'required|Array',
             ]);
             if ($validator->fails()) {
                 throw new \Exception('data'.$validator->getMessageBag());
@@ -73,7 +68,7 @@ class InvestigationController extends Controller
                     'options' => 'required|Array',
                 ]);
                 if ($validator->fails()) {
-                    throw new \Exception('question'.$validator->getMessageBag());
+                    throw new \Exception('questions'.$validator->getMessageBag());
                 }
                 foreach($question['options'] as $option){
                     $validator = Validator::make($option, [
@@ -85,7 +80,7 @@ class InvestigationController extends Controller
                     }
                 }
             }
-            DB::transaction(function() use($all,$questions,$id){
+            $investigationId = DB::transaction(function() use($all,$questions,$id){
                 if(empty($id)){
                     //add
                     //add Investigation
@@ -119,9 +114,11 @@ class InvestigationController extends Controller
                 //edit
 
                 }
+                return $investigation->id;
             });
+            $investigationLogic = InvestigationLogic::getInvestigationDetail($investigationId);
 
-            return $this->success('你好');
+            return $this->success( $investigationLogic->toArray());
         }catch (\Exception $e){
             return $this->error($e->getMessage());
         }
