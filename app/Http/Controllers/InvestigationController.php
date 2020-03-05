@@ -65,18 +65,20 @@ class InvestigationController extends Controller
                     'name' => 'required',
                     'type' => 'required|In:radio,checkbox,textarea',
                     'is_must' => 'required|In:0,1',
-                    'options' => 'required|Array',
                 ]);
                 if ($validator->fails()) {
                     throw new \Exception('questions'.$validator->getMessageBag());
                 }
-                foreach($question['options'] as $option){
-                    $validator = Validator::make($option, [
-                        'name' => 'required',
-                        'score' => 'required|Between:0,100',
-                    ]);
-                    if ($validator->fails()) {
-                        throw new \Exception('option'.$validator->getMessageBag());
+                //type check and validation
+                if($question['type'] != InvestigationQuestion::TEXTAREA_TYPE){
+                    foreach($question['options'] as $option){
+                        $validator = Validator::make($option, [
+                            'name' => 'required',
+                            'score' => 'required|Between:0,100',
+                        ]);
+                        if ($validator->fails()) {
+                            throw new \Exception('option'.$validator->getMessageBag());
+                        }
                     }
                 }
             }
@@ -99,16 +101,18 @@ class InvestigationController extends Controller
                         $investigationQuestion->name = $question['name'];
                         $investigationQuestion->type =   $question['type'];
                         $investigationQuestion->is_must = $question['is_must'];
+                        $investigationQuestion->sort = $question['sort'];
                         $investigationQuestion->saveOrFail();
                         //add Option
-                        foreach ($question['options'] as $option){
-                            $investigationQuestionOption = new InvestigationQuestionOption();
-                            $investigationQuestionOption->investigation_question_id = $investigationQuestion->id;
-                            $investigationQuestionOption->name = $option['name'];
-                            $investigationQuestionOption->score = $option['score'];
-                            $investigationQuestionOption->saveOrFail();
+                        if($question['type'] != InvestigationQuestion::TEXTAREA_TYPE) {
+                            foreach ($question['options'] as $option) {
+                                $investigationQuestionOption = new InvestigationQuestionOption();
+                                $investigationQuestionOption->investigation_question_id = $investigationQuestion->id;
+                                $investigationQuestionOption->name = $option['name'];
+                                $investigationQuestionOption->score = $option['score'];
+                                $investigationQuestionOption->saveOrFail();
+                            }
                         }
-
                     }
                 }else{
                 //edit

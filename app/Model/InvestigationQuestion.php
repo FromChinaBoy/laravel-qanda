@@ -25,6 +25,10 @@ class InvestigationQuestion extends BaseModel
 {
     protected $table = 'investigation_question';
 
+    const RADIO_TYPE = 'radio';
+    const CHECKBOX_TYPE = 'checkbox';
+    const TEXTAREA_TYPE = 'textarea';
+
     /**
      * 选项
      * @author: zzhpeng
