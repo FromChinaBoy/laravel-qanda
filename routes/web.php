@@ -21,6 +21,7 @@ Route::get('/table', 'IndexController@table')->name('table'); //table页
 Route::group(['middleware' => 'auth'],function($route){
     $route->get('/investigation/edit/{id}', 'InvestigationController@edit'); //编辑页
     $route->post('/investigation/save', 'InvestigationController@save'); //提交数据 更新和添加
+    $route->post('/investigation/del', 'InvestigationController@del'); //删除
 });
 
 

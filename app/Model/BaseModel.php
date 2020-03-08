@@ -15,6 +15,7 @@ class BaseModel extends Model
 {
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
+    const DELETED_AT = 'delete_time';
 
     /**
      * The attributes that should be hidden for arrays.

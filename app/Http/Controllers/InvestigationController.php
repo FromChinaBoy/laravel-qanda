@@ -46,6 +46,7 @@ class InvestigationController extends Controller
     //保存与更新
     public function save(Request $request){
         try{
+            throw new \Exception('ss');
             //获取数据
             $all = $request->all();
             $questions = $request->input('questions');
@@ -125,6 +126,22 @@ class InvestigationController extends Controller
             return $this->success( $investigationLogic->toArray());
         }catch (\Exception $e){
             return $this->error($e->getMessage());
+        }
+
+    }
+
+    function del(Request $request){
+        try{
+            $id = $request->input('id');
+            $investigationModel = new Investigation();
+            $investigation = $investigationModel->where('id',$id)->where('user_id',Auth::id())->first();
+            if(empty($investigation->id)){
+                throw new \Exception('不存在该数据');
+            }
+            $investigation->delete();
+            return $this->success();
+        }catch (\Exception $exception){
+            return $this->error($exception->getMessage());
         }
 
     }

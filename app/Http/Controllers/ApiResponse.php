@@ -116,7 +116,7 @@ trait ApiResponse
      * @param string $status
      * @return mixed
      */
-    public function success($data, $status = "success"){
+    public function success($data = [], $status = "success"){
         return $this->status($status,compact('data'));
     }
 

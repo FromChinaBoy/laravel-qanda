@@ -15,8 +15,8 @@
         <li :class="item.status === 1 ? 'inissue' : ''">{{item.status_text}}</li>
         <li>
           <el-button @click="iterator = edit(item); iterator.next()">编辑</el-button>
-          <el-button @click="iterator = delItem(item.num); iterator.next()">删除</el-button>
-          <el-button @click="iterator = delItem(item.num); iterator.next()">查看问卷</el-button>
+          <el-button @click="iterator = delItem(item.id); iterator.next()">删除</el-button>
+          <el-button @click="iterator = delItem(item.id); iterator.next()">查看问卷</el-button>
           <!--<router-link :to="`/fill/${item.num}`" tag="el-button">查看问卷</router-link>-->
           <el-button @click="iterator = watchData(item); iterator.next()">查看数据</el-button>
         </li>
@@ -79,16 +79,48 @@ import storage from '../store.js'
         this.showDialog = true;
         this.info = info;
       },
-      *delItem(num) {
+      *delItem(id) {
         yield this.showDialogMsg('确认要删除此问卷')
 
         yield (() => {
-          let index = 0;
-          for (let length = this.qsList.length; index < length; index++) {
-            if (this.qsList[index].num === num) break;
-          }
-          this.qsList.splice(index, 1);
-          this.showDialog = false;
+            axios.post('/investigation/del', {
+                id: id,
+            })
+            .then(response => {
+                if(response.status == 200){
+                    let index = 0;
+                    for (let length = this.qsList.length; index < length; index++) {
+                        if (this.qsList[index].id === id) break;
+                    }
+                    this.qsList.splice(index, 1);
+                    this.showDialog = false;
+                    return;
+                }else{
+                    alert(response.message)
+                }
+            })
+              .catch(function (error) {
+              console.log('Error',error);
+              if (error.response) {
+                  // The request was made and the server responded with a status code
+                  // that falls out of the range of 2xx
+                  console.log(error.response.data);
+                  console.log(error.response.status);
+                  console.log(error.response.headers);
+                  if(error.response.status == 400){
+                      alert(error.response.data.message)
+                  }
+              } else if (error.request) {
+                  // The request was made but no response was received
+                  // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                  // http.ClientRequest in node.js
+                  console.log(error.request);
+              } else {
+                  // Something happened in setting up the request that triggered an Error
+                  console.log('Error', error.message);
+              }
+              // console.log(error.config);
+            });
         })();
       },
       *delItems() {

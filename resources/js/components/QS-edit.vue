@@ -279,15 +279,19 @@
                         'name': qsTitle,
                         'type': this.addOptionType,
                         'is_must': true,
-                        'options': options
+                        'options': options,
+                        'sort': this.qsItem.questions.length,
                     });
                     this.showAddQsDialog = false
                 } else {
+                    //radsa
                     this.qsItem.questions.push({
                         'num': this.qsItem.questions.length - 1,
-                        'title': qsTitle,
-                        'type': 'textarea',
-                        'isNeed': true
+                        'id': 0,
+                        'name': qsTitle,
+                        'type': this.addOptionType,
+                        'is_must': true,
+                        'sort': this.qsItem.questions.length,
                     })
                     this.showAddQsDialog = false
                 }
@@ -329,10 +333,34 @@
                     questions: this.qsItem.questions
                 })
                 .then(function (response) {
+                    if(response.status == 200){
+                        window.location.href = "/"
+                        return
+                    }else{
+                        alert(response.message)
+                    }
                     console.log(response);
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        console.log(error.response.data);
+                        console.log(error.response.status);
+                        console.log(error.response.headers);
+                        if(error.response.status == 400){
+                            alert(error.response.data.message)
+                        }
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                        // http.ClientRequest in node.js
+                        console.log(error.request);
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        console.log('Error', error.message);
+                    }
+                    console.log(error.config);
                 });
             },
             * issueQs() {

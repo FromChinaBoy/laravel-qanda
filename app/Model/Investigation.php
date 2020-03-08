@@ -7,6 +7,7 @@
  */
 
 namespace App\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Investigation
@@ -24,6 +25,7 @@ namespace App\Model;
 class Investigation extends BaseModel
 {
     use SimpleStatus;
+    use SoftDeletes;
 
     protected $table = 'investigation';
 
