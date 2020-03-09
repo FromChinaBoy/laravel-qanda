@@ -259,7 +259,7 @@
                 if (this.showAddOptionInput) {
                     let qsOptions = this.qsInputOptions.trim()
                     if (qsOptions === '') return alert('选项不能为空！')
-                    qsOptions = qsOptions.split(',')
+                    qsOptions = qsOptions.replace(/，/g,',').split(',')
                     for (let i = 0, length = qsOptions.length; i < length; i++) {
                         if (qsOptions[i].trim() === '') {
                             return alert('存在某个选项内容为空')
@@ -272,7 +272,6 @@
                         });
                     }
 
-                    console.log('this.qsItem.questions',this.qsItem);
                     this.qsItem.questions.push({
                         'num': this.qsItem.questions.length - 1,
                         'id': 0,
@@ -320,8 +319,7 @@
                     alert('问卷为空无法保存')
                     return ;
                 }
-                this.qsItem.status = 1
-                this.qsItem.statusTitle = '发布中'
+                this.qsItem.statusTitle = '未发布'
                 this.showDialog = false
                 // 可选地，上面的请求可以这样做
                 axios.post('/investigation/save', {
@@ -333,13 +331,14 @@
                     questions: this.qsItem.questions
                 })
                 .then(function (response) {
-                    if(response.status == 200){
+                    console.log('response',response)
+                    if(response.data.code == 200){
+                        console.log('response',response)
                         window.location.href = "/"
                         return
                     }else{
-                        alert(response.message)
+                        alert(response.data.message)
                     }
-                    console.log(response);
                 })
                 .catch(function (error) {
                     if (error.response) {
@@ -400,6 +399,7 @@
             addNum(questions) {
                 questions.forEach((item, index) => {
                     item.num = `Q${index + 1}`
+                    item.sort = index
                 })
             }
         },

@@ -7,6 +7,7 @@
  */
 
 namespace App\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class InvestigationQuestion
@@ -23,6 +24,8 @@ namespace App\Model;
  */
 class InvestigationQuestion extends BaseModel
 {
+    use SoftDeletes;
+
     protected $table = 'investigation_question';
 
     const RADIO_TYPE = 'radio';

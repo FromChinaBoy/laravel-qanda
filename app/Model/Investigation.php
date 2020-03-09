@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Class Investigation
  * @package App\Model
  * @Author  zzhpeng
+ * @property    integer $id
  * @property    integer $user_id              用户id
  * @property    string  $name                 调查名
  * @property    string  $desc                 描述

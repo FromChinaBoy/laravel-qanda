@@ -7,6 +7,7 @@
  */
 
 namespace App\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class InvestigationQuestionOption
@@ -21,5 +22,7 @@ namespace App\Model;
  */
 class InvestigationQuestionOption extends BaseModel
 {
+    use SoftDeletes;
+
     protected $table = 'investigation_question_option';
 }
