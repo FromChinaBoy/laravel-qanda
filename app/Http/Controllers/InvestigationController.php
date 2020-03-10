@@ -43,7 +43,7 @@ class InvestigationController extends Controller
             $myInvestigation = $investigationLogic->toArray();
         }
 
-        return view('edit', ['my_investigation1' => json_encode($myInvestigation)]);
+        return view('edit', ['my_investigation' => json_encode($myInvestigation)]);
     }
 
     //保存与更新
@@ -222,6 +222,14 @@ class InvestigationController extends Controller
         }
     }
 
+    /**
+     * 删除
+     * @author: zzhpeng
+     * Date: 10/3/2020
+     * @param Request $request
+     *
+     * @return mixed
+     */
     function del(Request $request)
     {
         try {
@@ -236,6 +244,16 @@ class InvestigationController extends Controller
         } catch (\Exception $exception) {
             return $this->error($exception->getMessage());
         }
+    }
 
+    function fill($id)
+    {
+        $myInvestigation = [];
+        if ($id > 0) {
+            $investigationLogic = InvestigationLogic::getInvestigationDetail($id);
+            $myInvestigation = $investigationLogic->toArray();
+        }
+
+        return view('fill', ['my_investigation' => json_encode($myInvestigation)]);
     }
 }

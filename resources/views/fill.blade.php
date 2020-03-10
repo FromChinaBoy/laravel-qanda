@@ -12,8 +12,8 @@
                         @csrf
                         <template>
                             <el-tabs v-model="activeName" @tab-click="handleClick">
-                                <el-tab-pane label="编辑" name="first">
-                                    <qs-edit style="padding-bottom:200px"></qs-edit>
+                                <el-tab-pane label="调表" name="first">
+                                    <qs-fill style="padding-bottom:200px"></qs-fill>
                                 </el-tab-pane>
                             </el-tabs>
                         </template>

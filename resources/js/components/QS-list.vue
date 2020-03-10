@@ -15,9 +15,8 @@
         <li :class="item.status === 1 ? 'inissue' : ''">{{item.status_text}}</li>
         <li>
           <el-button @click="iterator = edit(item); iterator.next()">编辑</el-button>
-          <el-button @click="iterator = delItem(item.id); iterator.next()">删除</el-button>
-          <el-button @click="iterator = delItem(item.id); iterator.next()">查看问卷</el-button>
-          <!--<router-link :to="`/fill/${item.num}`" tag="el-button">查看问卷</router-link>-->
+          <el-button @click="iterator = delItem(item); iterator.next()">删除</el-button>
+          <el-button @click="iterator = fillItem(item); iterator.next()">填写问卷</el-button>
           <el-button @click="iterator = watchData(item); iterator.next()">查看数据</el-button>
         </li>
       </ul>
@@ -79,18 +78,23 @@ import storage from '../store.js'
         this.showDialog = true;
         this.info = info;
       },
-      *delItem(id) {
+      *delItem(item) {
+        if(item.status !== 0 ){
+            alert('已发布问卷不能删除！');
+            return
+        }
+
         yield this.showDialogMsg('确认要删除此问卷')
 
         yield (() => {
             axios.post('/investigation/del', {
-                id: id,
+                id: item.id,
             })
             .then(response => {
                 if(response.status == 200){
                     let index = 0;
                     for (let length = this.qsList.length; index < length; index++) {
-                        if (this.qsList[index].id === id) break;
+                        if (this.qsList[index].id === item.id) break;
                     }
                     this.qsList.splice(index, 1);
                     this.showDialog = false;
@@ -138,6 +142,14 @@ import storage from '../store.js'
             if (this.qsList.indexOf(item) > -1) this.qsList.splice(this.qsList.indexOf(item), 1);
           } )
         })();     
+      },
+      *fillItem(item) {
+          if (item.status !== 1) {
+              alert('该调查表未发布！！');
+              return;
+          } else {
+              this.goUrl('/investigation/fill/' + item.id)
+          }
       },
       *edit(item) {
           console.log('item',item)

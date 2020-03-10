@@ -1,32 +1,32 @@
 <template>
   <div class="fill-container">
     <div class="fill" v-if="!isError">
-      <router-link to="/" tag="span" class="back">&lt; 返回</router-link>
-      <h2>{{qsItem.title}}</h2>
+      <h2>2222</h2>
+
       <div class="content">
-        <div class="content-item" v-for="item in qsItem.question">
+        <div class="content-item" v-for="item in qsItem.questions">
           <p class="qs-title">
             {{item.num}}&nbsp;{{item.title}}&nbsp;{{getMsg(item)}}
           </p>
           <p v-for="option in item.options" class="option">
             <label>
-              <input 
-              type="radio" 
-              :name="`${item.num}-${item.title}`"
-              v-model="requiredItem[item.num]"
-              v-if="item.type === 'radio'"
-              :value="option">
-              <input 
-              type="checkbox" 
-              :name="`${item.num}-${item.title}`"
-              v-model="requiredItem[item.num]"
-              v-if="item.type === 'checkbox'"
-              :value="option">{{option}}
+              <input
+                    type="radio"
+                    :name="`${item.num}-${item.title}`"
+                    v-model="requiredItem[item.num]"
+                    v-if="item.type === 'radio'"
+                    :value="option.name">
+              <input
+                      type="checkbox"
+                      :name="`${item.num}-${item.title}`"
+                      v-model="requiredItem[item.num]"
+                      v-if="item.type === 'checkbox'"
+                      :value="option.name">{{option.name}}
             </label>
           </p>
-          <textarea 
-          v-if="item.type === 'textarea'" 
-          v-model="requiredItem[item.num]"></textarea>
+          <textarea
+                  v-if="item.type === 'textarea'"
+                  v-model="requiredItem[item.num]"></textarea>
         </div>
       </div>
       <transition name="fade">
@@ -62,8 +62,7 @@
 </template>
 
 <script>
-import storage from '../store.js'
-
+// import storage from '../store.js'
 /**
  * A module that define qs-fill router view
  * @exports qs-fill
@@ -74,7 +73,7 @@ import storage from '../store.js'
     data() {
       return {
         qsItem: [],
-        qsList: storage.get(),
+        qsList: [],
         isError: false,
         showDialog: false,
         info: '',
@@ -83,21 +82,29 @@ import storage from '../store.js'
       }
     },
     created() {
-      this.fetchData()
+        if (my_investigation.length != 0) {
+            this.qsItem = my_investigation
+            this.id = this.qsItem.id
+        }
+        this.fetchData();
     },
     mounted() {
       this.getRequiredItem()
     },
     methods: {
+      addNum(questions) {
+          questions.forEach((item, index) => {
+              item.num = `Q${index + 1}`
+              item.sort = index
+          })
+      },
       fetchData() {
-        let i = 0;
-        for (let length = this.qsList.length; i < length; i++) {
-          if (this.qsList[i].num == this.$route.params.num) {
-            this.qsItem = this.qsList[i]
-            break
+          if (this.qsItem.questions) {
+              this.addNum(this.qsItem.questions);
           }
-        }
-        if (i === this.qsList.length) this.isError = true
+          if(this.qsItem.length){
+              this.isError = true
+          }
       },
       getMsg(item) {
         let msg = ''
@@ -136,9 +143,9 @@ import storage from '../store.js'
         }
       },
       getRequiredItem() {
-        this.qsItem.question.forEach( item => {
-          if (item.isNeed) {
-            if (item.isNeed) {
+        this.qsItem.questions.forEach( item => {
+          if (item.is_must) {
+            if (item.is_must) {
               if (item.type === 'checkbox') {
                 this.requiredItem[item.num] = []
               } else {
