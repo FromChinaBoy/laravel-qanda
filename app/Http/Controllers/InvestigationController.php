@@ -274,12 +274,25 @@ class InvestigationController extends Controller
         try {
             //获取数据
             $answer = $request->input('answer');
+            $id = $request->input('id');
+
+            //有效时间验证
+            $investigation = (new Investigation())->findOrFail($id);
+            if($investigation->status != Investigation::enableStatus()){
+                throw new \Exception('表单未激活状态，不能填写');
+            }
+            if($investigation->effective_time < date('Y-m-d')){
+                throw new \Exception('表单已过有效期');
+            }
 
             //数据验证
             $investigationQuestions = InvestigationQuestion::whereIn('id', array_keys($answer))->get();
             if ($investigationQuestions->count() != count(array_keys($answer))) {
                 throw new \Exception('提交数据有误');
             }
+
+
+
 
             //一个问题，限制一个ip提交一次
             // debug false

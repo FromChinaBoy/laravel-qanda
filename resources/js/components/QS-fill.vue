@@ -125,7 +125,8 @@
           if (result) {
             // 可选地，上面的请求可以这样做
             axios.post('/investigation/fillSubmit', {
-                answer: this.requiredItem
+                answer: this.requiredItem,
+                id: this.qsItem.id
             })
             .then(function (response) {
                 console.log('response',response)

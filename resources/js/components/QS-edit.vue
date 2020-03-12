@@ -377,17 +377,42 @@
                 // 可选地，上面的请求可以这样做
                 axios.post('/investigation/save', {
                     id: this.qsItem.id,
-                    name: this.qsItem.name,
-                    desc: this.qsItem.desc,
+                    name: this.qsItem.name.trim(),
+                    desc: this.qsItem.desc.trim(),
                     status: this.qsItem.status,
                     effective_time: this.qsItem.effective_time,
                     questions: this.qsItem.questions
                 })
                 .then(function (response) {
-                    console.log(response);
+                    console.log('response',response)
+                    if(response.data.code == 200){
+                        console.log('response',response)
+                        window.location.href = "/"
+                        return
+                    }else{
+                        alert(response.data.message)
+                    }
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        console.log(error.response.data);
+                        console.log(error.response.status);
+                        console.log(error.response.headers);
+                        if(error.response.status == 400){
+                            alert(error.response.data.message)
+                        }
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                        // http.ClientRequest in node.js
+                        console.log(error.request);
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        console.log('Error', error.message);
+                    }
+                    console.log(error.config);
                 });
             },
             cancel() {

@@ -164,7 +164,7 @@ import storage from '../store.js'
           if (item.status_text === 'noissue') {
             this.showDialogMsg('未发布的问卷无数据可查看');
           } else {
-              this.goUrl('/investigation/data/' + item.id)
+              this.goUrl('/investigation/export/' + item.id)
           }
         })();
         yield this.showDialog = false;
