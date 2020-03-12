@@ -1,32 +1,32 @@
 <template>
   <div class="fill-container">
     <div class="fill" v-if="!isError">
-      <h2>2222</h2>
+      <h2>{{qsItem.name}}</h2>
 
       <div class="content">
         <div class="content-item" v-for="item in qsItem.questions">
           <p class="qs-title">
-            {{item.num}}&nbsp;{{item.title}}&nbsp;{{getMsg(item)}}
+            {{item.num}}&nbsp;{{item.name}}&nbsp;{{getMsg(item)}}
           </p>
           <p v-for="option in item.options" class="option">
             <label>
               <input
                     type="radio"
-                    :name="`${item.num}-${item.title}`"
-                    v-model="requiredItem[item.num]"
+                    :name="`${item.num}-${item.name}`"
+                    v-model="requiredItem[item.id]"
                     v-if="item.type === 'radio'"
                     :value="option.name">
               <input
                       type="checkbox"
-                      :name="`${item.num}-${item.title}`"
-                      v-model="requiredItem[item.num]"
+                      :name="`${item.num}-${item.name}`"
+                      v-model="requiredItem[item.id]"
                       v-if="item.type === 'checkbox'"
                       :value="option.name">{{option.name}}
             </label>
           </p>
           <textarea
                   v-if="item.type === 'textarea'"
-                  v-model="requiredItem[item.num]"></textarea>
+                  v-model="requiredItem[item.id]"></textarea>
         </div>
       </div>
       <transition name="fade">
@@ -52,7 +52,7 @@
         </div>
       </transition>  
       <footer>
-        <button @click="submit" class="submit">提交</button>
+        <el-button @click="submit" class="submit">提交</el-button>
       </footer>
     </div>
     <div class="error" v-else>
@@ -116,46 +116,76 @@
           msg = '(文本题)'
         }
 
-        return item.isNeed ? `${msg} *` : msg
+        return item.is_must ? `${msg} *` : msg
       },
       submit() {
-        if (this.qsItem.state === 'inissue') {
+        if (this.qsItem.status === 1) {
+            console.log('requiredItem',this.requiredItem)
           let result = this.validate()
           if (result) {
-            this.showDialog = true
-            this.submitError = false
-            this.info = '提交成功！'
-            setTimeout(() => {
-              this.showDialog = false
-            }, 500)
-            setTimeout(() => {
-              this.$router.push({path: '/'})
-            }, 1500)
+            // 可选地，上面的请求可以这样做
+            axios.post('/investigation/fillSubmit', {
+                answer: this.requiredItem
+            })
+            .then(function (response) {
+                console.log('response',response)
+                if(response.data.code == 200){
+                    console.log('response',response)
+                    alert('提交成功！！')
+                    //1000毫秒调用一次
+                    window.setInterval(function(){
+                      window.location.href = '/'
+                    },1000);
+                    return
+                }else{
+                    alert(response.data.message)
+                }
+            })
+            .catch(function (error) {
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                    if (error.response.status == 400) {
+                        alert(error.response.data.message)
+                    }
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                    // http.ClientRequest in node.js
+                    console.log(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log('Error', error.message);
+                }
+                console.log(error.config);
+            });
           } else {
-            this.showDialog = true
-            this.submitError = true
-            this.info = '提交失败！ 存在必填项未填'
+              alert('提交失败！ 存在必填项未填');return ;
           }
         } else {
-          this.showDialog = true
-          this.submitError = true
-          this.info = '提交失败！ 只有发布中的问卷才能提交'
+            alert('提交失败！调查表未发布'); return;
+
         }
       },
-      getRequiredItem() {
+      getRequiredItem()
+        {
         this.qsItem.questions.forEach( item => {
           if (item.is_must) {
             if (item.is_must) {
               if (item.type === 'checkbox') {
-                this.requiredItem[item.num] = []
+                this.requiredItem[item.id] = []
               } else {
-                this.requiredItem[item.num] = ''
+                this.requiredItem[item.id] = ''
               }
             }
           }
-        } )
+        })
       },
-      validate() {
+      validate()
+      {
         for (let i in this.requiredItem) {
           if (this.requiredItem[i].length === 0) return false
         }

@@ -23,6 +23,9 @@ Route::group(['middleware' => 'auth'],function($route){
     $route->post('/investigation/save', 'InvestigationController@save'); //提交数据 更新和添加
     $route->post('/investigation/del', 'InvestigationController@del'); //删除
     $route->get('/investigation/fill/{id}', 'InvestigationController@fill'); //填表页面
+    $route->post('/investigation/fillSubmit', 'InvestigationController@fillSubmit'); //填表页面
+    $route->get('/investigation/data/{id}', 'InvestigationController@data'); //数据页面
+    $route->get('/investigation/export/{id}', 'InvestigationController@export'); //数据页面
 });
 
 

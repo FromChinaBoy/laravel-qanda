@@ -38,4 +38,14 @@ class Investigation extends BaseModel
     public function questions(){
         return $this->hasMany( 'App\Model\InvestigationQuestion','investigation_id','id');
     }
+
+    /**
+     * 选项答案
+     * @author: zzhpeng
+     * Date: 2020/1/13
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function answers(){
+        return $this->hasMany('App\Model\InvestigationQuestionAnswer','investigation_id','id');
+    }
 }

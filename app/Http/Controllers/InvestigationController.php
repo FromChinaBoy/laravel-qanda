@@ -9,9 +9,12 @@
 namespace App\Http\Controllers;
 
 
+use App\Logic\ExportLogic;
 use App\Logic\InvestigationLogic;
 use App\Model\Investigation;
 use App\Model\InvestigationQuestion;
+use App\Model\InvestigationQuestionAnswer;
+use App\Model\InvestigationQuestionAnswerDetail;
 use App\Model\InvestigationQuestionOption;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -133,15 +136,15 @@ class InvestigationController extends Controller
                     //edit InvestigationQuestion and Option
 
                     //删除InvestigationQuestion
-                    $newIds = array_column($questions,'id');
+                    $newIds = array_column($questions, 'id');
                     $investigationQuestionModel = new InvestigationQuestion();
-                    $oldIds= $investigationQuestionModel->where('investigation_id',$id)->pluck('id')->toArray();
-                    $delIds = array_diff($oldIds,$newIds);
-                    if($delIds){
-                        $investigationQuestionModel->whereIn('id',$delIds)->delete();
+                    $oldIds = $investigationQuestionModel->where('investigation_id', $id)->pluck('id')->toArray();
+                    $delIds = array_diff($oldIds, $newIds);
+                    if ($delIds) {
+                        $investigationQuestionModel->whereIn('id', $delIds)->delete();
                         //删除InvestigationQuestionOption
                         $investigationQuestionOptionModel = new InvestigationQuestionOption();
-                        $investigationQuestionOptionModel->whereIn('investigation_question_id',$delIds)->delete();
+                        $investigationQuestionOptionModel->whereIn('investigation_question_id', $delIds)->delete();
                     }
 
                     foreach ($questions as $question) {
@@ -150,7 +153,7 @@ class InvestigationController extends Controller
                         $investigationQuestionModel = new InvestigationQuestion();
 
                         $investigationQuestion = $investigationQuestionModel->find($question['id']);
-                        if($investigationQuestion){
+                        if ($investigationQuestion) {
                             //更新
                             $investigationQuestion->investigation_id = $investigation->id;
                             $investigationQuestion->name = $question['name'];
@@ -160,23 +163,23 @@ class InvestigationController extends Controller
                             $investigationQuestion->saveOrFail();
                             //删除InvestigationQuestion
                             $investigationQuestionOptionModel = new InvestigationQuestionOption();
-                            $oldIds= $investigationQuestionOptionModel->where('investigation_question_id',$investigationQuestion->id)->pluck('id')->toArray();
+                            $oldIds = $investigationQuestionOptionModel->where('investigation_question_id', $investigationQuestion->id)->pluck('id')->toArray();
                             //edit Option
                             if ($question['type'] != InvestigationQuestion::TEXTAREA_TYPE) {
                                 //删除InvestigationQuestion
-                                $newIds = array_column($question['options'],'id');
-                                InvestigationLogic::delInvestigationOptionWithIds($oldIds,$newIds);
+                                $newIds = array_column($question['options'], 'id');
+                                InvestigationLogic::delInvestigationOptionWithIds($oldIds, $newIds);
                                 foreach ($question['options'] as $option) {
                                     $investigationQuestionOptionModel = new InvestigationQuestionOption();
                                     //添加、更新 InvestigationQuestion
                                     $investigationQuestionOption = $investigationQuestionOptionModel->find($option['id']);
-                                    if($investigationQuestionOption){
+                                    if ($investigationQuestionOption) {
                                         //更新
                                         $investigationQuestionOption->investigation_question_id = $investigationQuestion->id;
                                         $investigationQuestionOption->name = $option['name'];
                                         $investigationQuestionOption->score = $option['score'];
                                         $investigationQuestionOption->saveOrFail();
-                                    }else{
+                                    } else {
                                         //添加
                                         $investigationQuestionOptionModel->investigation_question_id = $investigationQuestion->id;
                                         $investigationQuestionOptionModel->name = $option['name'];
@@ -184,13 +187,13 @@ class InvestigationController extends Controller
                                         $investigationQuestionOptionModel->saveOrFail();
                                     }
                                 }
-                            }else{
+                            } else {
                                 //如果改为InvestigationQuestion::TEXTAREA_TYPE ，删除option
-                                if($oldIds){
+                                if ($oldIds) {
                                     InvestigationLogic::delInvestigationOptionWithIds($oldIds);
                                 }
                             }
-                        }else{
+                        } else {
                             //添加
                             $investigationQuestionModel->investigation_id = $investigation->id;
                             $investigationQuestionModel->name = $question['name'];
@@ -198,7 +201,7 @@ class InvestigationController extends Controller
                             $investigationQuestionModel->is_must = $question['is_must'];
                             $investigationQuestionModel->sort = $question['sort'];
                             $investigationQuestionModel->saveOrFail();
-                                                     //add Option
+                            //add Option
                             if ($question['type'] != InvestigationQuestion::TEXTAREA_TYPE) {
                                 foreach ($question['options'] as $option) {
                                     $investigationQuestionOptionModel = new InvestigationQuestionOption();
@@ -226,6 +229,7 @@ class InvestigationController extends Controller
      * 删除
      * @author: zzhpeng
      * Date: 10/3/2020
+     *
      * @param Request $request
      *
      * @return mixed
@@ -246,6 +250,14 @@ class InvestigationController extends Controller
         }
     }
 
+    /**
+     * @author: zzhpeng
+     * Date: 12/3/2020
+     *
+     * @param $id
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     function fill($id)
     {
         $myInvestigation = [];
@@ -255,5 +267,91 @@ class InvestigationController extends Controller
         }
 
         return view('fill', ['my_investigation' => json_encode($myInvestigation)]);
+    }
+
+    function fillSubmit(Request $request)
+    {
+        try {
+            //获取数据
+            $answer = $request->input('answer');
+
+            //数据验证
+            $investigationQuestions = InvestigationQuestion::whereIn('id', array_keys($answer))->get();
+            if ($investigationQuestions->count() != count(array_keys($answer))) {
+                throw new \Exception('提交数据有误');
+            }
+
+            //一个问题，限制一个ip提交一次
+            // debug false
+            if(!env('APP_DEBUG')){
+                $investigationQuestionAnswerCount = InvestigationQuestionAnswer::where('investigation_id', $investigationQuestions->investigation_id)
+                    ->where('ip',$request->getClientIp())
+                    ->count();
+                if($investigationQuestionAnswerCount) {
+                    throw new \Exception('你已经提交过了');
+                }
+            }
+
+            Db::transaction(function () use ($answer, $investigationQuestions,$request) {
+                $investigationQuestionAnswerModel = new InvestigationQuestionAnswer();
+                $investigationQuestionAnswerModel->investigation_id = $investigationQuestions[0]->investigation_id;
+                $investigationQuestionAnswerModel->user_id = Auth::id();
+                $investigationQuestionAnswerModel->score = 0;
+                $investigationQuestionAnswerModel->ip = $request->getClientIp();
+                $investigationQuestionAnswerModel->saveOrFail();
+                foreach ($answer as $key =>$val) {
+                    $investigationQuestionAnswerDetailModel = new InvestigationQuestionAnswerDetail();
+                    $investigationQuestionAnswerDetailModel->investigation_question_answer_id = $investigationQuestionAnswerModel->id;
+                    $investigationQuestionAnswerDetailModel->investigation_question_id = $key;
+                    $investigationQuestionAnswerDetailModel->score = 0;
+                    $investigationQuestionAnswerDetailModel->content = is_array($val) ? implode(',', $val) : $val;
+                    $investigationQuestionAnswerDetailModel->saveOrFail();
+                }
+            });
+
+            return $this->success();
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * @author: zzhpeng
+     * Date: 12/3/2020
+     * @param $id
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View|mixed
+     */
+    function data($id)
+    {
+        try {
+            $myInvestigation = [];
+            if ($id > 0) {
+                $investigationLogic = InvestigationLogic::getInvestigationDetail($id);
+                $myInvestigation = $investigationLogic->toArray();
+            }
+
+            return view('data', ['my_investigation' => json_encode($myInvestigation)]);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * 导出
+     * @author: zzhpeng
+     * Date: 12/3/2020
+     * @param $id
+     *
+     * @return mixed
+     */
+    public function export($id){
+        try{
+            $data = InvestigationLogic::exportData($id);
+            $filename = date('Ymd') . 'investigation';
+            ExportLogic::investigation($data->toArray(),$filename);
+        }catch (\Exception $e){
+            return $this->error($e->getMessage());
+        }
     }
 }

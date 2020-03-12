@@ -12,8 +12,8 @@
                         @csrf
                         <template>
                             <el-tabs v-model="activeName" @tab-click="handleClick">
-                                <el-tab-pane label="编辑" name="first">
-                                    <qs-edit style="padding-bottom:200px"></qs-edit>
+                                <el-tab-pane label="数据" name="first">
+                                    <qs-data style="padding-bottom:200px"></qs-data>
                                 </el-tab-pane>
                             </el-tabs>
                         </template>
@@ -25,4 +25,5 @@
 @endsection
 <script>
     var my_investigation = {!! $my_investigation !!};
+    console.log(my_investigation)
 </script>

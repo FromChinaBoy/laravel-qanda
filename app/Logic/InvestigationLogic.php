@@ -50,4 +50,20 @@ class InvestigationLogic
         }
        $investigationQuestionModel->whereIn('id',$delIds)->delete();
     }
+
+
+    public static function exportData(int $id){
+        $myInvestigation = (new Investigation())->with(['answers'=>function($q){
+            $q->with(['details'=>function($q){
+                $q->orderBy('investigation_question_id','desc');
+            }]);
+        },'questions'=>function($q){
+            $q->orderBy('id','desc');
+        }])
+            ->orderBy('id','desc')
+            ->where('id',$id)
+            ->first();
+        return $myInvestigation;
+    }
+
 }

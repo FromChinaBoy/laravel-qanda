@@ -153,22 +153,8 @@ import storage from '../store.js'
       },
       *edit(item) {
           console.log('item',item)
-        yield (() => {
-          if (item.status === 0) {
-            this.showDialogMsg('确认要编辑？');
-          } else {
-            this.showDialogMsg('只有未发布的问卷才能编辑');
-          }
-        })();
-        yield (() => {
-          if (item.status !== 0) {
-              this.showDialog = false;
-          } else {
-              this.showDialog = false;
-              this.goUrl('/investigation/edit/' + item.id)
-          }
-
-        })();
+          this.showDialog = false;
+          this.goUrl('/investigation/edit/' + item.id)
       },
       goUrl(url) {
           window.location.href = url
@@ -178,7 +164,7 @@ import storage from '../store.js'
           if (item.status_text === 'noissue') {
             this.showDialogMsg('未发布的问卷无数据可查看');
           } else {
-            this.$router.push({ name: 'qsData', params: { num: item.num }})
+              this.goUrl('/investigation/data/' + item.id)
           }
         })();
         yield this.showDialog = false;

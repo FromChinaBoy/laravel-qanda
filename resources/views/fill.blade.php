@@ -8,7 +8,7 @@
         <div class="row justify-content-center">
             <div class="card" style="width: 1400px;">
                 <div class="card-body">
-                    <form method="POST" action="#21121">
+                    <form method="POST" action="">
                         @csrf
                         <template>
                             <el-tabs v-model="activeName" @tab-click="handleClick">

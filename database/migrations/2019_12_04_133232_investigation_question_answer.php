@@ -17,9 +17,8 @@ class InvestigationQuestionAnswer extends Migration
         Schema::create('investigation_question_answer', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('investigation_id');
-            $table->integer('investigation_question_id');
-            $table->text('content')->comment('内容');
-            $table->integer('user_id');
+            $table->integer('user_id')->nullable()->default(0);
+            $table->string('ip',20)->comment('调查ip地址');
             $table->integer('score')->default(0);
             $table->timestamp('create_time')->nullable();
             $table->timestamp('update_time')->nullable();

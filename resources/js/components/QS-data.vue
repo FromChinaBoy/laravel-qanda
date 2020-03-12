@@ -7,11 +7,11 @@
     </template>
 
     <div class="content" v-if="!isError">
-      <template v-for="(item, index) in qsItem.question">
+      <template v-for="(item, index) in qsItem.questions">
         <div class="content-item">
           <div class="item-left">
             <p>{{item.num}} &nbsp; {{item.title}}</p>
-              <p class="option" v-for="option in item.options">{{option}}</p>
+              <p class="option" v-for="option in item.options">{{option.name}}</p>
           </div>
           <div class="item-right" v-if="item.type === 'radio'">
             <p>数据占比</p>
@@ -66,6 +66,10 @@ import 'echarts/lib/component/toolbox'
       }
     },
     created() {
+      if (my_investigation.length != 0) {
+          this.qsItem = my_investigation
+          this.id = this.qsItem.id
+      }
       this.fetchData()
     },
     mounted() {
@@ -75,15 +79,19 @@ import 'echarts/lib/component/toolbox'
       } )
     },
     methods: {
+      addNum(questions) {
+          questions.forEach((item, index) => {
+              item.num = `Q${index + 1}`
+              item.sort = index
+          })
+      },
       fetchData() {
-        let i = 0;
-        for (let length = this.qsList.length; i < length; i++) {
-          if (this.qsList[i].num == this.$route.params.num) {
-            this.qsItem = this.qsList[i]
-            break
+          if (this.qsItem.questions) {
+              this.addNum(this.qsItem.questions);
           }
-        }
-        if (i === this.qsList.length) this.isError = true
+          if(this.qsItem.length){
+              this.isError = true
+          }
       },
       renderProgressMath(length, index) {
         if (length < 2) return '100%'
@@ -98,7 +106,7 @@ import 'echarts/lib/component/toolbox'
         }
       },
       renderChartData() {  
-        this.qsItem.question.forEach( item => {
+        this.qsItem.questions.forEach( item => {
           if (item.type === 'checkbox') {
             let value  = 0
             let sum    = 0
@@ -108,6 +116,7 @@ import 'echarts/lib/component/toolbox'
             this.chartNum.push(item.num);
 
             item.options.forEach( (optionName, index) => {
+                console.log('optionName',optionName)
               if (index == length - 1) {
                 value = 1000 - sum
               } else {

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class InvestigationTemplateQuestionRelation extends Migration
+class InvestigationQuestionAnswerDetail extends Migration
 {
     /**
      * Run the migrations.
@@ -14,11 +14,12 @@ class InvestigationTemplateQuestionRelation extends Migration
     public function up()
     {
         //
-        Schema::create('investigation_template_question_relation', function (Blueprint $table) {
+        Schema::create('investigation_question_answer_detail', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('investigation_template_id');
             $table->integer('investigation_question_id');
-            $table->tinyInteger('sort')->default(0);
+            $table->integer('investigation_question_answer_id');
+            $table->text('content')->comment('内容');
+            $table->integer('score')->default(0)->comment('回答分数');
             $table->timestamp('create_time')->nullable();
             $table->timestamp('update_time')->nullable();
             $table->softDeletes('delete_time');
@@ -32,6 +33,7 @@ class InvestigationTemplateQuestionRelation extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('investigation_template_question_relation');
+        //
+        Schema::dropIfExists('investigation_question_answer_detail');
     }
 }
