@@ -296,6 +296,7 @@ class InvestigationController extends Controller
             if (!env('APP_DEBUG')) {
                 $investigationQuestionAnswerCount = InvestigationQuestionAnswer::where('investigation_id', $investigationQuestions[0]->investigation_id)
                     ->where('ip', $request->getClientIp())
+                    ->where('user_id', Auth::id())
                     ->count();
                 if ($investigationQuestionAnswerCount) {
                     throw new \Exception('你已经提交过了');
