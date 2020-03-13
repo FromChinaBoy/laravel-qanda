@@ -13,6 +13,7 @@
 
 # ------------------ Index Route ------------------------
 Route::any('/', 'IndexController@welcome'); //首页列表页
+Route::any('/home', 'IndexController@welcome'); //首页列表页
 Route::get('/index/questions', 'IndexController@questions');
 
 

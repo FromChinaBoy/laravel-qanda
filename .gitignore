@@ -16,4 +16,4 @@ yarn-error.log
 .idea/
 .php_cs.cache
 composer.lock
-storage/framework/views/*
+storage/framework/*

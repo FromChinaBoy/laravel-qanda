@@ -55,10 +55,10 @@ class InvestigationLogic
     public static function exportData(int $id){
         $myInvestigation = (new Investigation())->with(['answers'=>function($q){
             $q->with(['details'=>function($q){
-                $q->orderBy('investigation_question_id','desc');
+                $q->orderBy('investigation_question_id','asc');
             }]);
         },'questions'=>function($q){
-            $q->orderBy('id','desc');
+            $q->orderBy('id','asc');
         }])
             ->orderBy('id','desc')
             ->where('id',$id)
