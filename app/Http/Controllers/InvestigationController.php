@@ -278,10 +278,10 @@ class InvestigationController extends Controller
 
             //有效时间验证
             $investigation = (new Investigation())->findOrFail($id);
-            if($investigation->status != Investigation::enableStatus()){
+            if ($investigation->status != Investigation::enableStatus()) {
                 throw new \Exception('表单未激活状态，不能填写');
             }
-            if($investigation->effective_time < date('Y-m-d')){
+            if ($investigation->effective_time < date('Y-m-d')) {
                 throw new \Exception('表单已过有效期');
             }
 
@@ -291,28 +291,25 @@ class InvestigationController extends Controller
                 throw new \Exception('提交数据有误');
             }
 
-
-
-
             //一个问题，限制一个ip提交一次
             // debug false
-            if(!env('APP_DEBUG')){
-                $investigationQuestionAnswerCount = InvestigationQuestionAnswer::where('investigation_id', $investigationQuestions->investigation_id)
-                    ->where('ip',$request->getClientIp())
+            if (!env('APP_DEBUG')) {
+                $investigationQuestionAnswerCount = InvestigationQuestionAnswer::where('investigation_id', $investigationQuestions[0]->investigation_id)
+                    ->where('ip', $request->getClientIp())
                     ->count();
-                if($investigationQuestionAnswerCount) {
+                if ($investigationQuestionAnswerCount) {
                     throw new \Exception('你已经提交过了');
                 }
             }
 
-            Db::transaction(function () use ($answer, $investigationQuestions,$request) {
+            Db::transaction(function () use ($answer, $investigationQuestions, $request) {
                 $investigationQuestionAnswerModel = new InvestigationQuestionAnswer();
                 $investigationQuestionAnswerModel->investigation_id = $investigationQuestions[0]->investigation_id;
                 $investigationQuestionAnswerModel->user_id = Auth::id();
                 $investigationQuestionAnswerModel->score = 0;
                 $investigationQuestionAnswerModel->ip = $request->getClientIp();
                 $investigationQuestionAnswerModel->saveOrFail();
-                foreach ($answer as $key =>$val) {
+                foreach ($answer as $key => $val) {
                     $investigationQuestionAnswerDetailModel = new InvestigationQuestionAnswerDetail();
                     $investigationQuestionAnswerDetailModel->investigation_question_answer_id = $investigationQuestionAnswerModel->id;
                     $investigationQuestionAnswerDetailModel->investigation_question_id = $key;
@@ -331,6 +328,7 @@ class InvestigationController extends Controller
     /**
      * @author: zzhpeng
      * Date: 12/3/2020
+     *
      * @param $id
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View|mixed
@@ -354,16 +352,18 @@ class InvestigationController extends Controller
      * 导出
      * @author: zzhpeng
      * Date: 12/3/2020
+     *
      * @param $id
      *
      * @return mixed
      */
-    public function export($id){
-        try{
+    public function export($id)
+    {
+        try {
             $data = InvestigationLogic::exportData($id);
             $filename = date('Ymd') . 'investigation';
-            ExportLogic::investigation($data->toArray(),$filename);
-        }catch (\Exception $e){
+            ExportLogic::investigation($data->toArray(), $filename);
+        } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
     }
