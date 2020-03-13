@@ -1,9 +1,6 @@
 /node_modules
 /public/hot
 /public/storage
-/public/css/
-/public/fonts/
-/public/js/
 /storage/*.key
 /vendor
 .env
@@ -16,4 +13,4 @@ yarn-error.log
 .idea/
 .php_cs.cache
 composer.lock
-storage/framework/views/*
+storage/framework/*
